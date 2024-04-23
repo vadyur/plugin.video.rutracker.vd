@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.rutracker.vd" name="RuTracker" version="0.30.0+matrix" provider-name="HAL9000, -=Vd=-">
+<addon id="plugin.video.rutracker.vd" name="RuTracker" version="0.30.1+matrix" provider-name="HAL9000, -=Vd=-">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.torrserver" optional="true" />
