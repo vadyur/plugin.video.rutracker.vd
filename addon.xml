@@ -5,6 +5,7 @@
     <import addon="script.module.torrserver" optional="true" />
     <import addon="plugin.video.elementum" optional="true" />
     <import addon="plugin.video.tam" optional="true" />
+	<import addon="script.module.requests" />
   </requires>
   <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
     <provides>video</provides>
