@@ -4471,12 +4471,13 @@ class Stream(TorrentBase):
         from xbmcup.bencodepy import bdecode
 
         try:
-            info = bdecode(torrent)[b"info"]
+            info: Dict[bytes, Any] = bdecode(torrent)[b"info"]
+
         except bdecode.BTFailure as e:
             _log(e)
-        else:
 
-            def _decode(s):
+        else:
+            def _decode(s) -> str:
                 try:
                     return s.decode("utf8")
                 except:
@@ -4485,43 +4486,47 @@ class Stream(TorrentBase):
                     except:
                         return s
 
-            if "files" in info:
+            if b"files" in info:
+                def get_path(parts: List[bytes]) -> List[str]:
+                    strs = [ _decode(part) for part in parts ]
+                    return strs
+
+                def full_name(parts: List[bytes]) -> str:
+                    strs = [ _decode(part) for part in parts ]
+                    return os.sep.join(strs)
+
                 if pathfile:
-                    files = [
-                        dict(
+                    def file_item(i: int, x: Dict[bytes, Any]):
+                        return dict(
                             id=i,
-                            fullname=_decode(
-                                os.sep.join([info["name"], os.sep.join(x["path"])])
-                            ),
-                            path=x["path"],
-                            name=_decode(os.sep.join(x["path"])),
-                            size=x["length"],
+                            fullname=full_name(x[b"path"]),
+                            path=get_path(x[b"path"]),
+                            name=_decode(os.sep.join(x[b"path"])),
+                            size=x[b"length"],
                         )
-                        for i, x in enumerate(info["files"])
-                    ]
+
+                    files = [ file_item(i, x) for i, x in enumerate(info[b"files"]) ]
+
                 else:
-                    files = [
-                        dict(
+                    def file_item2(i: int, x: Dict[bytes, Any]):
+                        return dict(
                             id=i,
-                            fullname=_decode(
-                                os.sep.join([info["name"], os.sep.join(x["path"])])
-                            ),
-                            path=x["path"],
-                            name=_decode(x["path"][-1]),
-                            size=x["length"],
+                            fullname=full_name(x[b"path"]),
+                            path=get_path(x[b"path"]),
+                            name=_decode(x[b"path"][-1]),
+                            size=x[b"length"],
                         )
-                        for i, x in enumerate(info["files"])
-                    ]
+                    files = [ file_item2(i, x) for i, x in enumerate(info[b"files"]) ]
+
             else:
-                files = [
-                    dict(
+                files = [ dict(
                         id=0,
                         fullname=_decode(info[b"name"]),
-                        path=[info[b"name"]],
+                        path=[_decode(info[b"name"])],
                         name=_decode(info[b"name"]),
                         size=info[b"length"],
-                    )
-                ]
+                ) ]
+
             if sortfile:
                 from functools import cmp_to_key
 
