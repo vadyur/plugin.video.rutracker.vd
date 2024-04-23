@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.rutracker.vd" name="RuTracker" version="0.30.0" provider-name="HAL9000, -=Vd=-">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0" />
+    <import addon="script.module.torrserver" optional="true" />
+    <import addon="plugin.video.elementum" optional="true" />
+    <import addon="plugin.video.tam" optional="true" />
+  </requires>
+  <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">RuTracker</summary>
+    <description lang="en_GB">You can search RuTracker and download torrents.</description>
+    <summary lang="ru_RU">Навигатор по RuTracker</summary>
+    <description lang="ru_RU">Навигатор по сайту RuTracker с возможностью скачивания торрентов.[CR]Просмотр через Elementum, TorrServer, Torrent2http, TAM.[CR]Скачивание торрентов с помощью Deluge, qBittorrent, rTorrent, Transmission и uTorrent.</description>
+    <platform>all</platform>
+    <assets>
+        <icon>resources/icon.png</icon>
+        <fanart>resources/fanart.jpg</fanart>
+        <screenshot></screenshot>
+    </assets>
+  </extension>
+</addon>

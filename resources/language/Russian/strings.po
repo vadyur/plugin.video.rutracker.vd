@@ -1,0 +1,1220 @@
+# Kodi Media Center language file
+# Addon Name: RuTracker
+# Addon id: plugin.video.rutracker.vd
+# Addon Provider: HAL9000, -=Vd=-
+#
+msgid ""
+msgstr ""
+
+msgctxt "#100000"
+msgid "Seeds:  %s      Peers:  %s      Speed:  %s            %s"
+msgstr "Сиды:  %s      Пиры:  %s      Скорость:  %s            %s"
+
+msgctxt "#100001"
+msgid "Initialization"
+msgstr "Инициализация"
+
+msgctxt "#100002"
+msgid "Buffering"
+msgstr "Буферизация"
+
+msgctxt "#100003"
+msgid "Downloading"
+msgstr "Скачиваем"
+
+msgctxt "#100004"
+msgid "Uploading"
+msgstr "Раздаем"
+
+msgctxt "#100005"
+msgid "Seeding"
+msgstr "Сидируем"
+
+msgctxt "#100006"
+msgid "Stopping"
+msgstr "Останавливаем"
+
+msgctxt "#100007"
+msgid "Copying"
+msgstr "Копируем"
+
+msgctxt "#100031"
+msgid "Buffer"
+msgstr "Буфер"
+
+msgctxt "#100032"
+msgid "File"
+msgstr "Файл"
+
+msgctxt "#100033"
+msgid "Total"
+msgstr "Раздача"
+
+msgctxt "#100100"
+msgid "byte"
+msgstr "байт"
+
+msgctxt "#100101"
+msgid "KB"
+msgstr "Кбайт"
+
+msgctxt "#100102"
+msgid "MB"
+msgstr "Мбайт"
+
+msgctxt "#100103"
+msgid "GB"
+msgstr "Гбайт"
+
+msgctxt "#100104"
+msgid "TB"
+msgstr "Тбайт"
+
+msgctxt "#100200"
+msgid "bit/sec"
+msgstr "бит/сек"
+
+msgctxt "#100201"
+msgid "Kbit/sec"
+msgstr "Кбит/сек"
+
+msgctxt "#100202"
+msgid "Mbit/sec"
+msgstr "Мбит/сек"
+
+msgctxt "#100203"
+msgid "Gbit/sec"
+msgstr "Гбит/сек"
+
+msgctxt "#100204"
+msgid "Tbit/sec"
+msgstr "Тбит/сек"
+
+msgctxt "#30001"
+msgid "The server is temporarily unavailable.|Please try again later."
+msgstr "Сервер временно не доступен.|Попробуйте позже. Или проверьте доступ к сайту и настройки."
+
+msgctxt "#30002"
+msgid "The forum is temporarily down.|Please try again in 10-15 minutes."
+msgstr "Форум временно отключен.|Повторите попытку через 10-15 минут."
+
+msgctxt "#30003"
+msgid "The description was not found."
+msgstr "Описание не найдено."
+
+msgctxt "#30004"
+msgid "Screenshots were not found."
+msgstr "Скриншоты не найдены."
+
+msgctxt "#30005"
+msgid "There are no comments."
+msgstr "Комментарии отсутствуют."
+
+msgctxt "#30008"
+msgid "Not found."
+msgstr "Ничего не найдено."
+
+msgctxt "#30009"
+msgid "The review was not found"
+msgstr "Рецензии не найдены"
+
+msgctxt "#30010"
+msgid "The cache was empty"
+msgstr "Кэш сброшен"
+
+msgctxt "#30011"
+msgid "The file has been completely downloaded.|Do you want to transfer it to the movies folder?"
+msgstr "Файл был полностью скачен.|Хотите перенести его в коллекцию?"
+
+msgctxt "#30012"
+msgid "Copy the file to the movies folder..."
+msgstr "Копируем файл в коллекцию..."
+
+msgctxt "#30013"
+msgid "The file has been successfully transferred to the movies folder."
+msgstr "Файл успешно перенесен в коллекцию."
+
+msgctxt "#30014"
+msgid "Could not connect to the torrent client.|Check if it is available.|Also check the settings of your add-on."
+msgstr "Не смогли подключиться к торрент-клиенту.|Проверьте, включен ли он.|Также проверьте настройки дополнения."
+
+msgctxt "#30015"
+msgid "The torrent was successfully added.|The download has started.|Open the plugin uTorrent?"
+msgstr "Торрент успешно добавлен.|Скачивание файлов раздачи запущено.|Открыть плагин uTorrent?"
+
+msgctxt "#30016"
+msgid "The torrent was successfully added.|The download has started.|Open the plugin Transmission?"
+msgstr "Торрент успешно добавлен.|Скачивание файлов раздачи запущено.|Открыть плагин Transmission?"
+
+msgctxt "#30020"
+msgid "The content is added to favorites"
+msgstr "Контент добавлен в закладки"
+
+msgctxt "#30021"
+msgid "The content was removed from favorites"
+msgstr "Контент удален из закладок"
+
+msgctxt "#30022"
+msgid "Phrase removed from search history"
+msgstr "Фраза удалена из истории поиска"
+
+msgctxt "#30030"
+msgid "The process of forced caching|can take quite a long time.|Are you sure that you want to continue?"
+msgstr "Процесс форсированного кэширования может|занять довольно продолжительное время.|Уверены, что хотите продолжить?"
+
+msgctxt "#30031"
+msgid "The forced caching section was completed."
+msgstr "Форсированное кэширование раздела завершено."
+
+msgctxt "#30032"
+msgid "The cookies was empty"
+msgstr "Куки успешно удалены"
+
+msgctxt "#30033"
+msgid "Plugin not found.|Please install program plugin "ExtendedInfo Script"."
+msgstr "Дополнение не найдено.|Установите программное дополнение "ExtendedInfo Script" и настройте его."
+
+msgctxt "#30034"
+msgid "The torrent was successfully added.|The download has started."
+msgstr "Торрент успешно добавлен.|Скачивание файлов раздачи запущено."
+
+msgctxt "#30035"
+msgid "The torrent was successfully added.|The download has started.|Open the plugin Deluge?"
+msgstr "Торрент успешно добавлен.|Скачивание файлов раздачи запущено.|Открыть плагин Deluge?"
+
+msgctxt "#30036"
+msgid "The torrent was successfully added.|The download has started.|Open the plugin rTorrent?"
+msgstr "Торрент успешно добавлен.|Скачивание файлов раздачи запущено.|Открыть плагин rTorrent?"
+
+msgctxt "#30037"
+msgid "You have no favorites."
+msgstr "У вас нет избранных раздач."
+
+msgctxt "#30038"
+msgid "Content added to Favorites on the tracker"
+msgstr "Контент добавлен в избранное на трекере"
+
+msgctxt "#30039"
+msgid "Content removed from Favorites on the tracker"
+msgstr "Контент удалён из избранного на трекере"
+
+msgctxt "#30040"
+msgid "The poster was not found."
+msgstr "Афиша не найдена."
+
+msgctxt "#30041"
+msgid "Do you confirm fludhing the cache?"
+msgstr "Вы подтверждаете очистку кэша?"
+
+msgctxt "#30042"
+msgid "Distribution saved in TorrServer database"
+msgstr "Раздача успешно сохранена в базе TorrServera"
+
+msgctxt "#30101"
+msgid "Back"
+msgstr "Назад"
+
+msgctxt "#30102"
+msgid "Forward"
+msgstr "Вперед"
+
+msgctxt "#30103"
+msgid "Page"
+msgstr "Страница"
+
+msgctxt "#30104"
+msgid "Loading comments..."
+msgstr "Загружаем комментарии..."
+
+msgctxt "#30105"
+msgid "Loading reviews..."
+msgstr "Загружаем рецензии..."
+
+msgctxt "#30111"
+msgid "Experience"
+msgstr "Стаж"
+
+msgctxt "#30112"
+msgid "Posts"
+msgstr "Сообщений"
+
+msgctxt "#30113"
+msgid "From"
+msgstr "Откуда"
+
+msgctxt "#30114"
+msgid "Find"
+msgstr "Поиск"
+
+msgctxt "#30115"
+msgid "Enter number page. All pages: "
+msgstr "Введите номер страницы для перехода. Всего: "
+
+msgctxt "#30116"
+msgid " Current: "
+msgstr " Текущая: "
+
+msgctxt "#30117"
+msgid "Today news"
+msgstr "Новинки за сегодня"
+
+msgctxt "#30118"
+msgid "Last 3 day news"
+msgstr "Новинки за 3 последних дня"
+
+msgctxt "#30119"
+msgid "Most seeders"
+msgstr "Самые раздаваемые"
+
+msgctxt "#30120"
+msgid "Popular"
+msgstr "Популярные"
+
+msgctxt "#40001"
+msgid "Information"
+msgstr "Информация"
+
+msgctxt "#40002"
+msgid "Description"
+msgstr "Описание"
+
+msgctxt "#40003"
+msgid "Screenshots"
+msgstr "Скриншоты"
+
+msgctxt "#40004"
+msgid "Comments"
+msgstr "Комментарии"
+
+msgctxt "#40005"
+msgid "Status of the distribution"
+msgstr "Статус раздачи"
+
+msgctxt "#40006"
+msgid "Searching for similar distributions"
+msgstr "Поиск похожих раздач"
+
+msgctxt "#40007"
+msgid "Reviews"
+msgstr "Рецензии"
+
+msgctxt "#40008"
+msgid "Watch using LibTorrent"
+msgstr "Смотреть через LibTorrent"
+
+msgctxt "#40009"
+msgid "Add to favorites"
+msgstr "Добавить в закладки"
+
+msgctxt "#40010"
+msgid "Remove from favorites"
+msgstr "Удалить из закладок"
+
+msgctxt "#40011"
+msgid "Open distribution"
+msgstr "Открыть раздачу"
+
+msgctxt "#40013"
+msgid "Extended info"
+msgstr "Расширенная информация"
+
+msgctxt "#40014"
+msgid "Update description in cache"
+msgstr "Обновить описание в кэше"
+
+msgctxt "#40015"
+msgid "Add-on settings"
+msgstr "Настройки дополнения"
+
+msgctxt "#40017"
+msgid "Update information site Tvdb in cache"
+msgstr "Обновить информацию с сайта Tvdb в кэше"
+
+msgctxt "#40018"
+msgid "Go to page"
+msgstr "Перейти на страницу"
+
+msgctxt "#40019"
+msgid "Update information site Tmdb in cache"
+msgstr "Обновить информацию с сайта Tmdb в кэше"
+
+msgctxt "#40020"
+msgid "Transfer to uTorrent"
+msgstr "Передать в uTorrent"
+
+msgctxt "#40021"
+msgid "Transfer to Transmission"
+msgstr "Передать в Transmission"
+
+msgctxt "#40023"
+msgid "Watch using TorrentStream"
+msgstr "Смотреть через TorrentStream"
+
+msgctxt "#40024"
+msgid "Watch using DelugeStream"
+msgstr "Смотреть через DelugeStream"
+
+msgctxt "#40025"
+msgid "Watch using Elementum plugin"
+msgstr "Смотреть через дополнение Elementum"
+
+msgctxt "#40026"
+msgid "Watch using TAM plugin"
+msgstr "Смотреть через дополнение TAM"
+
+msgctxt "#40027"
+msgid "Watch using Torrenter plugin"
+msgstr "Смотреть через дополнение Torrenter"
+
+msgctxt "#40028"
+msgid "Watch using TorrServer"
+msgstr "Смотреть через TorrServer"
+
+msgctxt "#40029"
+msgid "Go in TAM plugin"
+msgstr "Перейти в дополнение TAM с возвратом"
+
+msgctxt "#40030"
+msgid "Forced caching"
+msgstr "Форсированное кэширование"
+
+msgctxt "#40031"
+msgid "Transfer to Deluge"
+msgstr "Передать в Deluge"
+
+msgctxt "#40032"
+msgid "Transfer to qBittorrent"
+msgstr "Передать в qBittorrent"
+
+msgctxt "#40033"
+msgid "Transfer to rTorrent"
+msgstr "Передать в rTorrent"
+
+msgctxt "#40034"
+msgid "Watch using Torrent2http"
+msgstr "Смотреть через Torrent2http"
+
+msgctxt "#40035"
+msgid "Delete from search history"
+msgstr "Удалить из истории поиска"
+
+msgctxt "#40036"
+msgid "Put to Favorites on the tracker"
+msgstr "Положить в избранное [трекер]"
+
+msgctxt "#40037"
+msgid "Remove from Favorites on the tracker"
+msgstr "Убрать из избранного [трекер]"
+
+msgctxt "#40038"
+msgid "Search in section ..."
+msgstr "Искать в разделе ..."
+
+msgctxt "#40039"
+msgid "RuTracker: Search in"
+msgstr "RuTracker: Искать в"
+
+msgctxt "#40040"
+msgid "Poster"
+msgstr "Афиша"
+
+msgctxt "#40041"
+msgid "Save in TorrServer database"
+msgstr "Сохранить в базу TorrServer"
+
+msgctxt "#40101"
+msgid "Trailers"
+msgstr "Трейлеры"
+
+msgctxt "#40102"
+msgid "Runtime"
+msgstr "Продолжительность"
+
+msgctxt "#40103"
+msgid "min"
+msgstr "мин."
+
+msgctxt "#40104"
+msgid "Budget"
+msgstr "Бюджет"
+
+msgctxt "#40105"
+msgid "Revenue"
+msgstr "Доход"
+
+msgctxt "#40491"
+msgid "Seeders"
+msgstr "Сиды"
+
+msgctxt "#40492"
+msgid "Leechers"
+msgstr "Личи"
+
+msgctxt "#40493"
+msgid "Downloaded"
+msgstr "Скачали"
+
+msgctxt "#40494"
+msgid "Comments"
+msgstr "Комментарии"
+
+msgctxt "#40501"
+msgid "premoderation"
+msgstr "премодерация"
+
+msgctxt "#40502"
+msgid "checking"
+msgstr "проверяется"
+
+msgctxt "#40503"
+msgid "repeat"
+msgstr "повтор"
+
+msgctxt "#40504"
+msgid "not issued"
+msgstr "не оформлено"
+
+msgctxt "#40505"
+msgid "copyright"
+msgstr "закрыто правообладателем"
+
+msgctxt "#40506"
+msgid "closed"
+msgstr "закрыто"
+
+msgctxt "#40507"
+msgid "swallow up"
+msgstr "поглощено"
+
+msgctxt "#40508"
+msgid "not checked"
+msgstr "не проверено"
+
+msgctxt "#40509"
+msgid "not completely issued"
+msgstr "недооформлено"
+
+msgctxt "#40510"
+msgid "doubtful"
+msgstr "сомнительно"
+
+msgctxt "#40511"
+msgid "temporary"
+msgstr "временная"
+
+msgctxt "#40512"
+msgid "checked"
+msgstr "проверено"
+
+msgctxt "#40801"
+msgid "Get a list of objects in the section..."
+msgstr "Получаем список объектов в разделе..."
+
+msgctxt "#40802"
+msgid "Page"
+msgstr "Страница"
+
+msgctxt "#40803"
+msgid "Caching the content in the section..."
+msgstr "Кэшируем контент в разделе..."
+
+msgctxt "#40804"
+msgid "Object"
+msgstr "Объект"
+
+msgctxt "#50100"
+msgid "RuTracker"
+msgstr "RuTracker"
+
+msgctxt "#50101"
+msgid "Login"
+msgstr "Логин"
+
+msgctxt "#50102"
+msgid "Password"
+msgstr "Пароль"
+
+msgctxt "#50103"
+msgid "Show status of distribution in their names"
+msgstr "Показывать статус раздач в их названиях"
+
+msgctxt "#50104"
+msgid "Clear the cache for the site RuTracker"
+msgstr "Очистить кэш для сайта RuTracker"
+
+msgctxt "#50105"
+msgid "Show rating of distributions (ex. - IMDb) in their names"
+msgstr "Показывать рейтинг раздач (например - IMDb) в их названиях"
+
+msgctxt "#50106"
+msgid "Automatically download wallpapers"
+msgstr "Автоматически подгружать обои"
+
+msgctxt "#50107"
+msgid "Site url"
+msgstr "Адрес сайта"
+
+msgctxt "#50108"
+msgid "Update screenshot in cache"
+msgstr "Обновлять отсутствующие в кэше скриншоты (возможно замедление)"
+
+msgctxt "#50109"
+msgid "Unblock site"
+msgstr "Разблокировка сайта"
+
+msgctxt "#50110"
+msgid "disable"
+msgstr "отключена"
+
+msgctxt "#50111"
+msgid "Anizapret"
+msgstr "с помощью сервиса Антизапрет"
+
+msgctxt "#50112"
+msgid "Http proxy"
+msgstr "с помощью http(s) прокси"
+
+msgctxt "#50113"
+msgid "Socks5 proxy"
+msgstr "с помощью socks5 прокси"
+
+msgctxt "#50115"
+msgid "Information for "Series""
+msgstr "Информация о "Сериалах" с"
+
+msgctxt "#50116"
+msgid "site Tvdb"
+msgstr "сайта Tvdb"
+
+msgctxt "#50117"
+msgid "tracker"
+msgstr "трекера (быстро)"
+
+msgctxt "#50121"
+msgid "Delete the cookies for site RuTracker"
+msgstr "Удалить куки для сайта RuTracker"
+
+msgctxt "#50122"
+msgid "Information for "Films""
+msgstr "Информация о "Фильмах" с"
+
+msgctxt "#50123"
+msgid "site Tmdb"
+msgstr "сайта Tmdb (долго)"
+
+msgctxt "#50124"
+msgid "tracker & rating Tmdb"
+msgstr "трекера и рейтинг с Tmdb"
+
+msgctxt "#50125"
+msgid "tracker & rating,fanart Tmdb"
+msgstr "трекера и рейтинг,обои,афиша с Tmdb"
+
+msgctxt "#50126"
+msgid "Tmdb & lost description tracker"
+msgstr "Tmdb и отсутствующее описание с трекера"
+
+msgctxt "#50130"
+msgid "Information for "Cartoon""
+msgstr "Информация о "Мультипликации" с"
+
+msgctxt "#50135"
+msgid "Turbo mode"
+msgstr "Турбо режим (только названия раздач с трекера)"
+
+msgctxt "#50136"
+msgid "Show number seeders in distribution names"
+msgstr "Показывать число раздающих в названиях раздач"
+
+msgctxt "#50137"
+msgid "Proxy host (ip or domain name)"
+msgstr "Хост прокси (ip или имя)"
+
+msgctxt "#50138"
+msgid "Proxy port"
+msgstr "Порт прокси"
+
+msgctxt "#50140"
+msgid "Show screenshots"
+msgstr "Показывать скриншоты"
+
+msgctxt "#50141"
+msgid "one by one"
+msgstr "по одному"
+
+msgctxt "#50142"
+msgid "all (slideshow)"
+msgstr "все (слайд-шоу)"
+
+msgctxt "#50145"
+msgid "Select torrent engine (player)"
+msgstr "Предпочитаемый торрент движок (плеер)"
+
+msgctxt "#50146"
+msgid "Show wallpaper(fanart.jpg) plugin"
+msgstr "Показывать обои(fanart.jpg) дополнения"
+
+msgctxt "#50147"
+msgid "Look for screenshots in the description of the distribution"
+msgstr "Искать скриншоты в описании раздачи"
+
+msgctxt "#50148"
+msgid "Take cache data in turbo mode"
+msgstr "Брать данные из кэша при турбо режиме"
+
+msgctxt "#50150"
+msgid "Torrserver"
+msgstr "Torrserver"
+
+msgctxt "#50151"
+msgid "Elementum"
+msgstr "Elementum"
+
+msgctxt "#50152"
+msgid "TAM"
+msgstr "TAM"
+
+msgctxt "#50153"
+msgid "Torrenter"
+msgstr "Torrenter"
+
+msgctxt "#50154"
+msgid "LibTorrent"
+msgstr "LibTorrent"
+
+msgctxt "#50155"
+msgid "TorrentStream"
+msgstr "TorrentStream"
+
+msgctxt "#50156"
+msgid "DelugeStream"
+msgstr "DelugeStream"
+
+msgctxt "#50157"
+msgid "Open TAM"
+msgstr "Открыть в TAM"
+
+msgctxt "#50158"
+msgid "Torrent2http"
+msgstr "Torrent2http"
+
+msgctxt "#50159"
+msgid "TM(TV)DB"
+msgstr "TM(TV)DB"
+
+msgctxt "#50160"
+msgid "Distribution list view"
+msgstr "Вид списка раздач по умолчанию"
+
+msgctxt "#50161"
+msgid "Default"
+msgstr "Не менять"
+
+msgctxt "#50162"
+msgid "View 1"
+msgstr "Список (Вид 1)"
+
+msgctxt "#50163"
+msgid "View 2"
+msgstr "Широкий список (Вид 2)"
+
+msgctxt "#50164"
+msgid "View 3"
+msgstr "Эскизы (Вид 3)"
+
+msgctxt "#50165"
+msgid "View 4"
+msgstr "Карусель постеров (Вид 4)"
+
+msgctxt "#50166"
+msgid "View 5"
+msgstr "Фанарт (Вид 5)"
+
+msgctxt "#50167"
+msgid "View 6"
+msgstr "Информация (Вид 6)"
+
+msgctxt "#50168"
+msgid "View 7"
+msgstr "Информация 2 (Вид 7)"
+
+msgctxt "#50169"
+msgid "View 8"
+msgstr "Информация 3 (Вид 8)"
+
+msgctxt "#50170"
+msgid "View 9"
+msgstr "Вид 9"
+
+msgctxt "#50171"
+msgid "View 10"
+msgstr "Вид 10"
+
+msgctxt "#50172"
+msgid "View 11"
+msgstr "Вид 11"
+
+msgctxt "#50173"
+msgid "View 12"
+msgstr "Вид 12"
+
+msgctxt "#50175"
+msgid "KinoPoisk"
+msgstr "KinoPoisk"
+
+msgctxt "#50176"
+msgid "Torrent"
+msgstr "Torrent"
+
+msgctxt "#50177"
+msgid "United Search"
+msgstr "United Search"
+
+msgctxt "#50178"
+msgid "Distribution file list view"
+msgstr "Вид списка файлов раздачи"
+
+msgctxt "#50179"
+msgid "Show data loading window"
+msgstr "Показывать окно загрузки данных"
+
+msgctxt "#50180"
+msgid "Quality of screenshots from lostpic.net"
+msgstr "Качество скриншотов с lostpic.net"
+
+msgctxt "#50181"
+msgid "Original"
+msgstr "Оригинальное"
+
+msgctxt "#50182"
+msgid "Good"
+msgstr "Хорошее"
+
+msgctxt "#50183"
+msgid "Bad"
+msgstr "Плохое"
+
+msgctxt "#50201"
+msgid "The maximum quality of trailers"
+msgstr "Максимальное качество трейлеров"
+
+msgctxt "#50202"
+msgid "Low"
+msgstr "Низкое"
+
+msgctxt "#50203"
+msgid "Middle"
+msgstr "Среднее"
+
+msgctxt "#50204"
+msgid "High"
+msgstr "Высокое"
+
+msgctxt "#50205"
+msgid "Low HD"
+msgstr "HD низкое"
+
+msgctxt "#50206"
+msgid "Middle HD"
+msgstr "HD среднее"
+
+msgctxt "#50207"
+msgid "High HD"
+msgstr "HD высокое"
+
+msgctxt "#50210"
+msgid "The number of results per page when searching"
+msgstr "Количество записей на странице при поиске"
+
+msgctxt "#50211"
+msgid "Clear the cache for the site KinoPoisk"
+msgstr "Очистить кэш для сайта KinoPoisk"
+
+msgctxt "#50301"
+msgid "The directory for saving files"
+msgstr "Директория для сохранения файлов"
+
+msgctxt "#50302"
+msgid "Open a dialogue window"
+msgstr "Вызывать диалог"
+
+msgctxt "#50303"
+msgid "Default setting"
+msgstr "Задать по умолчанию"
+
+msgctxt "#50304"
+msgid "The path to the directory"
+msgstr "Путь к директории"
+
+msgctxt "#50305"
+msgid "Create a subdirectory for scraper"
+msgstr "Создавать поддиректорию для скрапера"
+
+msgctxt "#50311"
+msgid "Torrent client"
+msgstr "Торрент-клиент"
+
+msgctxt "#50312"
+msgid "Host"
+msgstr "Хост"
+
+msgctxt "#50313"
+msgid "Port"
+msgstr "Порт"
+
+msgctxt "#50314"
+msgid "URL"
+msgstr "URL"
+
+msgctxt "#50315"
+msgid "Login"
+msgstr "Логин"
+
+msgctxt "#50316"
+msgid "Password"
+msgstr "Пароль"
+
+msgctxt "#50401"
+msgid "Actions with the downloaded files"
+msgstr "Действия со скаченными файлами"
+
+msgctxt "#50402"
+msgid "Delete"
+msgstr "Удалять"
+
+msgctxt "#50403"
+msgid "Save"
+msgstr "Сохранять"
+
+msgctxt "#50404"
+msgid "Offer to save"
+msgstr "Предлагать сохранить"
+
+msgctxt "#50411"
+msgid "Use your own directory for the buffer"
+msgstr "Использовать собственную директорию для буфера"
+
+msgctxt "#50412"
+msgid "Directory for the buffer"
+msgstr "Директория для буфера"
+
+msgctxt "#50501"
+msgid "Stay in the distribution after downloading the files"
+msgstr "Оставаться на раздаче после скачивания файлов"
+
+msgctxt "#50502"
+msgid "Limit the upload speed"
+msgstr "Ограничивать скорость раздачи"
+
+msgctxt "#50503"
+msgid "The maximum speed"
+msgstr "Максимальная скорость"
+
+msgctxt "#50521"
+msgid "Notify me when the download is finished"
+msgstr "Сообщать во время проигрывания о завершении загрузки"
+
+msgctxt "#50522"
+msgid "Sort the distribution files in reverse order"
+msgstr "Сортировать файлы раздачи в обратном порядке"
+
+msgctxt "#50523"
+msgid "Path to the file acestream.port"
+msgstr "Путь к файлу acestream.port"
+
+msgctxt "#50524"
+msgid "Sort the distribution files in alphabet order"
+msgstr "Сортировать файлы раздачи в алфавитном порядке"
+
+msgctxt "#50525"
+msgid "See Path for the distribution files"
+msgstr "Показывать путь для файлов раздачи"
+
+msgctxt "#50526"
+msgid "When sorting, consider the path for the distribution files"
+msgstr "При сортировке учитывать путь для файлов раздачи"
+
+msgctxt "#50527"
+msgid "See only video distribution files"
+msgstr "Показывать только видео файлы раздачи"
+
+msgctxt "#50528"
+msgid "See only audio distribution files"
+msgstr "Показывать только аудио файлы раздачи"
+
+msgctxt "#50531"
+msgid "Minimal size of buffer (MB)"
+msgstr "Минимальный размер буфера (Мбайт)"
+
+msgctxt "#50541"
+msgid "Host"
+msgstr "Хост"
+
+msgctxt "#50542"
+msgid "Port"
+msgstr "Порт"
+
+msgctxt "#50543"
+msgid "Size of buffer (%)"
+msgstr "Размер буффера (%)"
+
+msgctxt "#50544"
+msgid "Minimal size of buffer (MB)"
+msgstr "Минимальный размер буффера (Мбайт)"
+
+msgctxt "#50550"
+msgid "Use external plugin torrserver torrent streamer"
+msgstr "Использовать внешнее дополнение torrserver torrent streamer"
+
+msgctxt "#50551"
+msgid "Play external subtitles from the distribution"
+msgstr "Проигрывать внешние субтитры из раздачи"
+
+msgctxt "#50552"
+msgid "Save distributions in the torrserver database"
+msgstr "Сохранять раздачи в базе торрсервера"
+
+msgctxt "#50560"
+msgid "Pass magnet link in TAM"
+msgstr "Передавать magnet ссылку в TAM"
+
+msgctxt "#50580"
+msgid "Clear cache for TheMovieDB website"
+msgstr "Очистить кэш для сайта TheMovieDB"
+
+msgctxt "#50581"
+msgid "Clear cache for TVDB website"
+msgstr "Очистить кэш для сайта TVDB"
+
+msgctxt "#60000"
+msgid "Torserver's settings"
+msgstr "Настройки модуля TorrServer"
+
+msgctxt "#70101"
+msgid "Name"
+msgstr "Имя"
+
+msgctxt "#70102"
+msgid "Genre"
+msgstr "Жанр"
+
+msgctxt "#70103"
+msgid "Date"
+msgstr "Дата"
+
+msgctxt "#70104"
+msgid "Rating"
+msgstr "Рейтинг"
+
+msgctxt "#70105"
+msgid "Ratings"
+msgstr "Оценок"
+
+msgctxt "#70106"
+msgid "Country"
+msgstr "Страна"
+
+msgctxt "#70110"
+msgid "Find"
+msgstr "Искать"
+
+msgctxt "#70201"
+msgid "Full or partial name of the movie"
+msgstr "Полное или частичное название фильма"
+
+msgctxt "#70202"
+msgid "The genre of the movie"
+msgstr "Жанр фильма"
+
+msgctxt "#70203"
+msgid "The movie`s release date"
+msgstr "Дата выпуска фильма"
+
+msgctxt "#70204"
+msgid "The minimum rating"
+msgstr "Минимальный рейтинг"
+
+msgctxt "#70205"
+msgid "Number of ratings"
+msgstr "Количество оценок"
+
+msgctxt "#70206"
+msgid "The minimum age according to MPAA"
+msgstr "Минимальный возраст по MPAA"
+
+msgctxt "#70207"
+msgid "Was the movie released on DVD?"
+msgstr "Фильм вышел на DVD?"
+
+msgctxt "#70208"
+msgid "Is the movie on DVD?"
+msgstr "Страна производства"
+
+msgctxt "#70301"
+msgid "All"
+msgstr "Все"
+
+msgctxt "#70302"
+msgid "from"
+msgstr "от"
+
+msgctxt "#70303"
+msgid "Not necessarily"
+msgstr "Не обязательно"
+
+msgctxt "#70304"
+msgid "Yes"
+msgstr "Да"
+
+msgctxt "#70401"
+msgid "First name / Last name"
+msgstr "Имя / Фамилия"
+
+msgctxt "#70402"
+msgid "Type"
+msgstr "Амплуа"
+
+msgctxt "#80101"
+msgid "All genres"
+msgstr "Все жанры"
+
+msgctxt "#80102"
+msgid "Anime"
+msgstr "Аниме"
+
+msgctxt "#80103"
+msgid "Biography"
+msgstr "Биография"
+
+msgctxt "#80104"
+msgid "Action"
+msgstr "Боевик"
+
+msgctxt "#80105"
+msgid "Western"
+msgstr "Вестерн"
+
+msgctxt "#80106"
+msgid "War"
+msgstr "Военный"
+
+msgctxt "#80107"
+msgid "Mystery"
+msgstr "Детектив"
+
+msgctxt "#80108"
+msgid "Child's"
+msgstr "Детский"
+
+msgctxt "#80109"
+msgid "Documentary"
+msgstr "Документальный"
+
+msgctxt "#80110"
+msgid "Drama"
+msgstr "Драма"
+
+msgctxt "#80111"
+msgid "Game-Show"
+msgstr "Игра"
+
+msgctxt "#80112"
+msgid "History"
+msgstr "История"
+
+msgctxt "#80113"
+msgid "Comedy"
+msgstr "Комедия"
+
+msgctxt "#80114"
+msgid "Concert"
+msgstr "Концерт"
+
+msgctxt "#80115"
+msgid "Short film"
+msgstr "Короткометражка"
+
+msgctxt "#80116"
+msgid "Crime"
+msgstr "Криминал"
+
+msgctxt "#80117"
+msgid "Romance"
+msgstr "Мелодрама"
+
+msgctxt "#80118"
+msgid "Music"
+msgstr "Музыка"
+
+msgctxt "#80119"
+msgid "Animation"
+msgstr "Мультфильм"
+
+msgctxt "#80120"
+msgid "Musical"
+msgstr "Мюзикл"
+
+msgctxt "#80121"
+msgid "News"
+msgstr "Новости"
+
+msgctxt "#80122"
+msgid "Adventure"
+msgstr "Приключения"
+
+msgctxt "#80123"
+msgid "Reality-TV"
+msgstr "Реальное ТВ"
+
+msgctxt "#80124"
+msgid "Family"
+msgstr "Семейный"
+
+msgctxt "#80125"
+msgid "Sport"
+msgstr "Спорт"
+
+msgctxt "#80126"
+msgid "Talk-Show"
+msgstr "Ток-шоу"
+
+msgctxt "#80127"
+msgid "Thriller"
+msgstr "Триллер"
+
+msgctxt "#80128"
+msgid "Horror"
+msgstr "Ужасы"
+
+msgctxt "#80129"
+msgid "Sci-Fi"
+msgstr "Фантастика"
+
+msgctxt "#80130"
+msgid "Film-Noir"
+msgstr "Фильм-нуар"
+
+msgctxt "#80131"
+msgid "Fantasy"
+msgstr "Фэнтези"
+
+msgctxt "#90001"
+msgid "Reviews"
+msgstr "Рецензии зрителей"
+
+msgctxt "#90011"
+msgid "Positive"
+msgstr "Положительные"
+
+msgctxt "#90012"
+msgid "Negative"
+msgstr "Отрицательные"
+
+msgctxt "#90013"
+msgid "Neutral"
+msgstr "Нейтральные"
+
+msgctxt "#90014"
+msgid "All reviews"
+msgstr "Все рецензии"
+
