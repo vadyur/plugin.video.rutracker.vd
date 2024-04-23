@@ -10,6 +10,7 @@ import copy
 import time
 import calendar
 import collections
+from collections.abc import MutableMapping
 from .compat import cookielib, urlparse, urlunparse, Morsel
 
 import threading
@@ -156,7 +157,7 @@ class CookieConflictError(RuntimeError):
     Use .get and .set and include domain and path args in order to be more specific."""
 
 
-class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping): # type: ignore
+class RequestsCookieJar(cookielib.CookieJar, MutableMapping):
     """Compatibility class; is a cookielib.CookieJar, but exposes a dict
     interface.
 
