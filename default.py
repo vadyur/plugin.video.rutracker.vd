@@ -4468,13 +4468,15 @@ class Stream(TorrentBase):
         onlyvideo=False,
         onlyaudio=False,
     ):
-        from xbmcup.bencodepy import bdecode
+        from xbmcup.bencodepy import bdecode, BencodeDecodeError
 
         try:
             info: Dict[bytes, Any] = bdecode(torrent)[b"info"]
 
-        except bdecode.BTFailure as e:
-            _log(e)
+        except BencodeDecodeError as e:
+            _log(f"Failed to decode torrent data: {e}")
+            _log(f"Torrent data starts with: {torrent[:50] if torrent else 'None'}")
+            return []  # Return empty list when torrent data is invalid
 
         else:
             def _decode(s) -> str:

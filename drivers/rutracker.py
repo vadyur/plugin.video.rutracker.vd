@@ -1035,7 +1035,7 @@ class RuTrackerHTTP:
             self.site_url = 'http://' + self.domain.replace(' ','').replace('https://','').replace('http://','').replace('/','')
         else:
             self.site_url = 'https://' + self.domain.replace(' ','').replace('https://','').replace('http://','').replace('/','')
-        self.re_auth = re.compile(r'profile\.php\?mode=sendpassword"')
+        self.re_auth = re.compile(r'profile\.php\?mode=(sendpassword|register)"')
         # self.re_captcha = re.compile(r'<img src="(\/\/[^\/]+/captcha/[^"]+)"')
         # self.re_captcha_sid = re.compile(r'<input type="hidden" name="cap_sid" value="([^"]+)">')
         # self.re_captcha_code = re.compile(r'<input type="text" name="(cap_code_[^"]+)"')
