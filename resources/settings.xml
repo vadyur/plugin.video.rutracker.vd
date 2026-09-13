@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<category label="50100">
-		<setting id="rutracker_unblock" type="enum" label="50109" lvalues="50110|50111|50112|50113" default="0"/>
+		<setting id="rutracker_unblock" type="enum" label="50109" lvalues="50110|50111|50112|50113|50184" default="0"/>
 		<setting id="rutracker_proxy_host" type="text" label="50137" visible="eq(-1,2)" default="103.10.120.205" />
 		<setting id="rutracker_proxy_port" type="number" label="50138" visible="eq(-2,2)" values="8080" default="8080" />
 		<setting id="rutracker_socks5_host" type="text" label="50137" visible="eq(-3,3)" default="98.143.145.29" />
 		<setting id="rutracker_socks5_port" type="number" label="50138" visible="eq(-4,3)" values="62354" default="62354" />
+		<setting id="rutracker_flaresolverr_url" type="text" label="50185" visible="eq(-5,4)" default="http://127.0.0.1:8191" />
+		<setting id="rutracker_flaresolverr_timeout" type="number" label="50186" visible="eq(-6,4)" values="120" default="120" />
+		<setting id="rutracker_flaresolverr_direct_timeout" type="number" label="50187" visible="eq(-7,4)" values="45" default="45" />
 		<setting id="rutracker_domain" type="text" label="50107" default="rutracker.org" />
 		<setting id="rutracker_login" type="text" label="50101" default="" />
 		<setting id="rutracker_password" type="text" label="50102" option="hidden" default="" />

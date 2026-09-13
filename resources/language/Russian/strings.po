@@ -794,6 +794,22 @@ msgctxt "#50183"
 msgid "Bad"
 msgstr "Плохое"
 
+msgctxt "#50184"
+msgid "FlareSolverr"
+msgstr "FlareSolverr"
+
+msgctxt "#50185"
+msgid "FlareSolverr URL"
+msgstr "URL FlareSolverr"
+
+msgctxt "#50186"
+msgid "FlareSolverr timeout (sec)"
+msgstr "Таймаут FlareSolverr (сек)"
+
+msgctxt "#50187"
+msgid "Direct request timeout (sec)"
+msgstr "Таймаут прямого запроса (сек)"
+
 msgctxt "#50201"
 msgid "The maximum quality of trailers"
 msgstr "Максимальное качество трейлеров"

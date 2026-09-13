@@ -217,9 +217,13 @@ class RuTracker:
         # search = search.encode('utf8') #или это тоже работает
 
         # проверяем авторизацию
-        html = self.http.get(self.site_url+'/forum/index.php')
-        if not html:
-            return None
+        # при unblock==4 это лишний круг по сети: сам поисковый запрос ниже
+        # всё равно проходит через _fetch(), который сам увидит разлогин и
+        # переавторизуется
+        if self.http.unblock != 4:
+            html = self.http.get(self.site_url+'/forum/index.php')
+            if not html:
+                return None
 
         if search_id:
             page_query = ""
@@ -1047,6 +1051,8 @@ class RuTrackerHTTP:
         self.captcha_code_value = None
         self.http = HTTP()
         self.unblock = int(self.setting['rutracker_unblock'])
+        self._fs_cookies = []
+        self._fs_useragent = ''
         if self.unblock ==1:
             self.proxy_protocol = 'https'
             proxy_serv = self.setting['proxy_serv'].split(':')
@@ -1060,6 +1066,21 @@ class RuTrackerHTTP:
             self.proxy_protocol = 'socks5'
             self.proxy_host = self.setting['rutracker_socks5_host']
             self.proxy_port = int(self.setting['rutracker_socks5_port'])
+        if self.unblock ==4:
+            self.flaresolverr_url = self.setting['rutracker_flaresolverr_url'].rstrip('/')
+            self.flaresolverr_timeout = int(self.setting['rutracker_flaresolverr_timeout'])
+            # Прямой запрос с куками FlareSolverr - основной (быстрый) путь.
+            # Таймаут должен с запасом перекрывать задержку DPI провайдера
+            # (у заблокированных провайдером доменов первый байт приходит через ~20с),
+            # иначе прямой путь всегда падает по таймауту и всё уходит в медленный Chrome.
+            try:
+                self.flaresolverr_direct_timeout = int(self.setting['rutracker_flaresolverr_direct_timeout'])
+            except Exception:
+                self.flaresolverr_direct_timeout = 45
+            self._fs_latency = float(self.FS_HEDGE_MIN)
+            self._fs_state_file = self._fs_state_path()
+            self._fs_load_state()
+            self._fs_html_cache = None
 
         self.headers = {
 #            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:67.0) Gecko/20100101 Firefox/67.0',
@@ -1072,15 +1093,23 @@ class RuTrackerHTTP:
         if '.lib' in self.domain or self.domain in ('rutracker.net', 'rutracker.nl'): self.headers['Accept-Encoding'] = 'gzip' # фикс бага сервера
 
     def guest(self, url):
-        if self.unblock ==0: response = self.http.fetch(url, headers=self.headers)
-        if self.unblock >=1: response = self.http.fetch(url, headers=self.headers, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
-        if response.error:
-            return None
-        else:
-            body = response.body_decode('windows-1251', 'ignore')
+        if self.unblock == 4:
+            body = self._fs_request('GET', url)
+            if body is None:
+                return None
             if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
                 return 0
             return body
+        else:
+            if self.unblock == 0: response = self.http.fetch(url, headers=self.headers)
+            if self.unblock >= 1: response = self.http.fetch(url, headers=self.headers, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
+            if response.error:
+                return None
+            else:
+                body = response.body_decode('windows-1251', 'ignore')
+                if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
+                    return 0
+                return body
 
     def get(self, url):
         return self._fetch('GET', url)
@@ -1091,56 +1120,328 @@ class RuTrackerHTTP:
     def download(self, id):
         id = str(id)
 
-        # проверяем авторизацию
-        html = self.get(self.site_url+'/forum/viewtopic.php?t=' + id)
-        if not html:
-            return None
-
-        # хакаем куки
-        from http.cookiejar import MozillaCookieJar, Cookie # fast
-        cookies = MozillaCookieJar()
-        cookies.load(self.http.request.cookies)
-        cookies.set_cookie(
-            Cookie(
-                version=0,
-                name="bb_dl",
-                value=id,
-                port=None,
-                port_specified=False,
-                domain="."
-                + self.site_url.replace("https://", "").replace("http://", ""),
-                domain_specified=False,
-                domain_initial_dot=False,
-                path="/",
-                path_specified=True,
-                secure=False,
-                expires=None,
-                discard=True,
-                comment=None,
-                comment_url=None,
-                rest={"HttpOnly": ''},
-                rfc2109=False,
-            )
-        )
-        cookies.save(self.http.request.cookies, ignore_discard=True, ignore_expires=True)
-
-        # тянем торрент
-        if self.unblock ==0: response = self.http.fetch(self.site_url+'/forum/dl.php?t=' + id, cookies='rutracker.moz', headers=self.headers, method='POST')
-        if self.unblock >=1: response = self.http.fetch(self.site_url+'/forum/dl.php?t=' + id, cookies='rutracker.moz', headers=self.headers, method='POST', proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
-        if response.error:
+        if self.unblock == 4:
+            # Качаем .torrent напрямую с куками FlareSolverr.
+            # FlareSolverr для этого не годится: Chrome отдаёт тело как текст,
+            # бинарник торрента через него не вытащить - поэтому при неудаче
+            # переавторизуемся и повторяем прямой запрос.
+            url = self.site_url + '/forum/dl.php?t=' + id
+            for attempt in (1, 2):
+                # dl.php идемпотентен - можно страховать вторую попытку
+                data = self._fs_hedged_direct('POST', url, binary=True, cookies={'bb_dl': id})
+                if data and data[:1] == b'd':   # bencode: торрент-файл
+                    return data
+                if attempt == 1:
+                    xbmc.log('RUTRACKER: dl.php did not return a torrent, re-auth', xbmc.LOGDEBUG)
+                    if not self._auth():
+                        return None
             return None
         else:
-            return response.body
+            # проверяем авторизацию
+            html = self.get(self.site_url+'/forum/viewtopic.php?t=' + id)
+            if not html:
+                return None
 
-    def _fetch(self, method, url, params=None):
-        while True:
-            if self.unblock ==0: response = self.http.fetch(url, cookies='rutracker.moz', headers=self.headers, method=method, params=params)
-            if self.unblock >=1: response = self.http.fetch(url, cookies='rutracker.moz', headers=self.headers, method=method, params=params, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
-            # file('home/osmc/rutracker_fetch.txt', 'wb').write(response.body_decode('cp1251').encode('utf8'))
+            # хакаем куки
+            from http.cookiejar import MozillaCookieJar, Cookie # fast
+            cookies = MozillaCookieJar()
+            cookies.load(self.http.request.cookies)
+            cookies.set_cookie(
+                Cookie(
+                    version=0,
+                    name="bb_dl",
+                    value=id,
+                    port=None,
+                    port_specified=False,
+                    domain="."
+                    + self.site_url.replace("https://", "").replace("http://", ""),
+                    domain_specified=False,
+                    domain_initial_dot=False,
+                    path="/",
+                    path_specified=True,
+                    secure=False,
+                    expires=None,
+                    discard=True,
+                    comment=None,
+                    comment_url=None,
+                    rest={"HttpOnly": ''},
+                    rfc2109=False,
+                )
+            )
+            cookies.save(self.http.request.cookies, ignore_discard=True, ignore_expires=True)
+
+            # тянем торрент
+            if self.unblock == 0: response = self.http.fetch(self.site_url+'/forum/dl.php?t=' + id, cookies='rutracker.moz', headers=self.headers, method='POST')
+            if self.unblock >= 1: response = self.http.fetch(self.site_url+'/forum/dl.php?t=' + id, cookies='rutracker.moz', headers=self.headers, method='POST', proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
             if response.error:
                 return None
             else:
-                body = response.body_decode('windows-1251', 'replace')
+                return response.body
+
+    # ################################
+    #
+    #   FlareSolverr (unblock == 4)
+    #
+    #   Схема работы:
+    #     * FlareSolverr (headless Chrome) нужен только чтобы получить куки:
+    #       пройти проверку Cloudflare и залогиниться (POST login.php).
+    #       Это медленно (~30-70с), но делается один раз - куки переживают
+    #       перезапуск плагина.
+    #     * Все остальные запросы идут напрямую через urllib с этими куками
+    #       и User-Agent'ом от FlareSolverr (cf_clearance привязан к UA).
+    #       Chrome в горячем пути не участвует.
+    #     * GET-страницы дополнительно кэшируются на короткое время, чтобы
+    #       возврат по списку в Kodi не перезапрашивал ту же страницу.
+    #
+    # ################################
+
+    FS_CACHE_TTL = 300
+    FS_HEDGE_MIN = 3
+    FS_HEDGE_MAX = 25
+
+    def _fs_state_path(self):
+        import os
+        try:
+            import xbmcvfs  # type: ignore
+            dirname = xbmcvfs.translatePath('special://temp')
+            for subdir in ('xbmcup', 'plugin.video.rutracker.vd'):
+                dirname = os.path.join(dirname, subdir)
+                if not xbmcvfs.exists(dirname):
+                    xbmcvfs.mkdirs(dirname)
+        except Exception:
+            import tempfile
+            dirname = tempfile.gettempdir()
+        return os.path.join(dirname, 'flaresolverr_state.json')
+
+    def _fs_load_state(self):
+        import json as json_mod
+        try:
+            with open(self._fs_state_file, 'r') as f:
+                data = json_mod.load(f)
+            # cf_clearance выдаётся на конкретный домен - при смене зеркала
+            # старые куки только мешают
+            if data.get('domain') != self.domain:
+                raise ValueError('domain changed')
+            self._fs_cookies = data.get('cookies', [])
+            self._fs_useragent = data.get('useragent', '')
+            self._fs_latency = float(data.get('latency') or self.FS_HEDGE_MIN)
+            xbmc.log('RUTRACKER: FlareSolverr state loaded: %d cookies, latency %.1fs'
+                     % (len(self._fs_cookies), self._fs_latency), xbmc.LOGDEBUG)
+        except Exception:
+            self._fs_cookies, self._fs_useragent = [], ''
+
+    def _fs_save_state(self):
+        import json as json_mod
+        try:
+            with open(self._fs_state_file, 'w') as f:
+                json_mod.dump({'domain': self.domain, 'cookies': self._fs_cookies,
+                               'useragent': self._fs_useragent,
+                               'latency': self._fs_latency}, f)
+        except Exception as e:
+            xbmc.log('RUTRACKER: FlareSolverr state save failed: ' + str(e), xbmc.LOGWARNING)
+
+    def _fs_drop_state(self):
+        import os
+        self._fs_cookies, self._fs_useragent = [], ''
+        try:
+            os.remove(self._fs_state_file)
+        except Exception:
+            pass
+
+    def _fs_cookie_header(self, extra=None):
+        jar = dict((c['name'], c['value']) for c in self._fs_cookies)
+        if extra:
+            jar.update(extra)
+        return '; '.join(k + '=' + v for k, v in jar.items())
+
+    def _fs_api(self, payload, timeout=None):
+        """Вызов FlareSolverr API. Возвращает solution или None."""
+        import json as json_mod
+        from urllib.request import Request, urlopen
+        import time as time_mod
+
+        timeout = timeout or self.flaresolverr_timeout
+        payload.setdefault('maxTimeout', timeout * 1000)
+        t0 = time_mod.time()
+        req = Request(
+            self.flaresolverr_url + '/v1',
+            data=json_mod.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        try:
+            resp = urlopen(req, timeout=timeout + 30)
+            result = json_mod.loads(resp.read().decode('utf-8'))
+        except Exception as e:
+            xbmc.log('RUTRACKER: FlareSolverr %s error (%.1fs): %s'
+                     % (payload.get('cmd'), time_mod.time() - t0, e), xbmc.LOGERROR)
+            return None
+
+        elapsed = time_mod.time() - t0
+        if result.get('status') != 'ok':
+            xbmc.log('RUTRACKER: FlareSolverr %s failed (%.1fs): %s'
+                     % (payload.get('cmd'), elapsed, result.get('message', '')), xbmc.LOGERROR)
+            return None
+
+        solution = result.get('solution') or {}
+        cookies = solution.get('cookies')
+        if cookies:
+            self._fs_cookies = cookies
+            self._fs_useragent = solution.get('userAgent', '') or self._fs_useragent
+            self._fs_save_state()
+        xbmc.log('RUTRACKER: FlareSolverr %s %.1fs http=%s len=%d'
+                 % (payload.get('cmd'), elapsed, solution.get('status'),
+                    len(solution.get('response') or '')), xbmc.LOGDEBUG)
+        return solution
+
+    def _flaresolverr(self, method, url, params=None):
+        """Запрос через headless Chrome. Медленно - только как fallback и для логина."""
+        from urllib.parse import urlencode
+
+        payload = {
+            'cmd': 'request.get' if method == 'GET' else 'request.post',
+            'url': url,
+            'disableMedia': True,
+        }
+        if params:
+            if method == 'POST':
+                payload['postData'] = urlencode(params, encoding='windows-1251')
+            else:
+                payload['url'] = url + ('&' if '?' in url else '?') + urlencode(params, encoding='windows-1251')
+        # Куки Chrome не передаём: FlareSolverr 3.5.0 на параметр "cookies"
+        # отвечает HTTP 500 в любом формате. Залогиненное состояние он получает
+        # сам - через POST на login.php в _auth().
+
+        solution = self._fs_api(payload)
+        if solution is None:
+            return None
+        return solution.get('response', '')
+
+    def _fs_direct(self, method, url, params=None, binary=False, cookies=None, timeout=None):
+        """Прямой запрос с куками FlareSolverr. Основной (быстрый) путь."""
+        from urllib.request import Request, urlopen
+        from urllib.parse import urlencode
+        import time as time_mod
+
+        timeout = timeout or self.flaresolverr_direct_timeout
+
+        if method == 'POST':
+            data = urlencode(params, encoding='windows-1251').encode('ascii') if params else b''
+            req = Request(url, data=data, method='POST')
+            req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+        else:
+            if params:
+                url = url + ('&' if '?' in url else '?') + urlencode(params, encoding='windows-1251')
+            req = Request(url, method=method)
+
+        req.add_header('User-Agent', self._fs_useragent or self.headers['User-Agent'])
+        req.add_header('Accept', self.headers['Accept'])
+        req.add_header('Accept-Language', self.headers['Accept-Language'])
+        req.add_header('Accept-Encoding', 'gzip')
+        req.add_header('Referer', self.headers['Referer'])
+        cookie_str = self._fs_cookie_header(cookies)
+        if cookie_str:
+            req.add_header('Cookie', cookie_str)
+
+        t0 = time_mod.time()
+        try:
+            resp = urlopen(req, timeout=timeout)
+            data = resp.read()
+            if resp.headers.get('Content-Encoding') == 'gzip':
+                import zlib
+                data = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(data)
+        except Exception as e:
+            xbmc.log('RUTRACKER: direct %s failed %.1fs: %s' % (method, time_mod.time() - t0, e), xbmc.LOGWARNING)
+            return None
+
+        elapsed = time_mod.time() - t0
+        # скользящее среднее - на него опирается порог страховочной попытки
+        self._fs_latency = round(self._fs_latency * 0.5 + elapsed * 0.5, 2)
+        xbmc.log('RUTRACKER: direct %s %.1fs len=%d' % (method, elapsed, len(data)), xbmc.LOGDEBUG)
+        return data if binary else data.decode('windows-1251', 'replace')
+
+    def _fs_hedged_direct(self, method, url, params=None, **kw):
+        """Прямой запрос со "страховочной" второй попыткой.
+
+        Часть запросов к рутрекеру просто виснет до таймаута - и на чистом
+        канале (обычный ответ ~1с), и под DPI провайдера (~20с). Поэтому если
+        ответа нет дольше ожидаемого, параллельно пускаем второй такой же
+        запрос и берём тот, что вернётся первым.
+
+        Порог берём от реально замеренной скорости канала (_fs_latency), чтобы
+        на быстрой сети не ждать зря, а на медленной не дублировать каждый
+        нормальный запрос.
+        """
+        result = {}
+        done = thr.Event()
+
+        def attempt(tag):
+            body = self._fs_direct(method, url, params, **kw)
+            if body is not None and tag not in result:
+                result[tag] = body
+                done.set()
+            elif body is None:
+                result.setdefault('_failed_' + tag, True)
+                if len([k for k in result if k.startswith('_failed_')]) >= 2:
+                    done.set()
+
+        first = thr.Thread(target=attempt, args=('a',))
+        first.daemon = True
+        first.start()
+
+        hedge_after = min(self.FS_HEDGE_MAX, max(self.FS_HEDGE_MIN, self._fs_latency * 3))
+        if not done.wait(hedge_after):
+            xbmc.log('RUTRACKER: direct still pending, hedging with a second try', xbmc.LOGDEBUG)
+            second = thr.Thread(target=attempt, args=('b',))
+            second.daemon = True
+            second.start()
+            done.wait(self.flaresolverr_direct_timeout + 5)
+
+        return result.get('a') or result.get('b')
+
+    def _fs_request(self, method, url, params=None):
+        """Прямой запрос, при сетевой ошибке - fallback на FlareSolverr."""
+        if self._fs_cookies:
+            # дублировать можно только идемпотентные запросы; POST (закладки,
+            # логин) повторяем строго по одному
+            if method == 'GET':
+                body = self._fs_hedged_direct(method, url, params)
+            else:
+                body = self._fs_direct(method, url, params)
+            if body is not None:
+                return body
+            xbmc.log('RUTRACKER: direct failed, falling back to FlareSolverr', xbmc.LOGDEBUG)
+        return self._flaresolverr(method, url, params)
+
+    def _fs_get_cached(self, url):
+        """GET с коротким кэшем: возврат по списку в Kodi не бьёт по сети повторно."""
+        if self.FS_CACHE_TTL <= 0:
+            return self._fs_request('GET', url)
+        if self._fs_html_cache is None:
+            try:
+                self._fs_html_cache = Cache('rutracker_http.db', expire=self.FS_CACHE_TTL * 4)
+            except Exception:
+                self.FS_CACHE_TTL = 0
+                return self._fs_request('GET', url)
+
+        def fetch():
+            body = self._fs_request('GET', url)
+            # кэшируем только нормальные страницы залогиненного пользователя
+            if isinstance(body, str) and body and not self.re_auth.search(body):
+                return (self.FS_CACHE_TTL, body)
+            return (0, body)
+
+        return self._fs_html_cache.get('http|' + url, False, fetch)
+
+    def _fetch(self, method, url, params=None):
+        while True:
+            if self.unblock == 4:
+                if method == 'GET' and not params:
+                    body = self._fs_get_cached(url)
+                else:
+                    body = self._fs_request(method, url, params)
+                if body is None:
+                    return None
                 if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
                     return 0
                 if not self.re_auth.search(body):
@@ -1149,6 +1450,28 @@ class RuTrackerHTTP:
                 auth = self._auth()
                 if not auth:
                     return auth
+                body2 = self._fs_request(method, url, params)
+                if body2 is None:
+                    return None
+                if self.re_auth.search(body2):
+                    return None
+                return body2
+            else:
+                if self.unblock == 0: response = self.http.fetch(url, cookies='rutracker.moz', headers=self.headers, method=method, params=params)
+                if self.unblock >= 1: response = self.http.fetch(url, cookies='rutracker.moz', headers=self.headers, method=method, params=params, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
+                # file('home/osmc/rutracker_fetch.txt', 'wb').write(response.body_decode('cp1251').encode('utf8'))
+                if response.error:
+                    return None
+                else:
+                    body = response.body_decode('windows-1251', 'replace')
+                    if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
+                        return 0
+                    if not self.re_auth.search(body):
+                        return body
+                    xbmc.log('RUTRACKER: Request auth', xbmc.LOGDEBUG)
+                    auth = self._auth()
+                    if not auth:
+                        return auth
 
     def _auth(self):
         self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
@@ -1169,16 +1492,38 @@ class RuTrackerHTTP:
                 if self.captcha_code:
                     params[self.captcha_code] = self.captcha_code_value
 
-            if self.unblock ==0: response = self.http.fetch(self.site_url+'/forum/login.php', cookies='rutracker.moz', headers=self.headers, method='POST', params=params)
-            if self.unblock >=1: response = self.http.fetch(self.site_url+'/forum/login.php', cookies='rutracker.moz', headers=self.headers, method='POST', params=params, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
-            self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
-            if response.error:
-                return None
-
-            body = response.body_decode('windows-1251')
+            if self.unblock == 4:
+                # Логин только через FlareSolverr: Chrome проходит проверку
+                # Cloudflare и отдаёт нам готовые куки bb_session/cf_clearance.
+                # Старые куки сбрасываем - с протухшей сессией логин не проходит.
+                self._fs_drop_state()
+                body = self._flaresolverr('POST', self.site_url + '/forum/login.php', params)
+                self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
+                if body is None:
+                    return None
+                if self._fs_html_cache is not None:
+                    self._fs_html_cache.flush()
+            elif self.unblock == 0:
+                response = self.http.fetch(self.site_url+'/forum/login.php', cookies='rutracker.moz', headers=self.headers, method='POST', params=params)
+                self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
+                if response.error:
+                    return None
+                body = response.body_decode('windows-1251')
+            else:
+                response = self.http.fetch(self.site_url+'/forum/login.php', cookies='rutracker.moz', headers=self.headers, method='POST', params=params, proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
+                self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
+                if response.error:
+                    return None
+                body = response.body_decode('windows-1251')
 
             if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
                 return 0
+
+            if self.unblock == 4:
+                if not self.re_auth.search(body):
+                    return True
+                xbmc.log('RUTRACKER: FlareSolverr auth failed', xbmc.LOGDEBUG)
+                return None
 
             if not self.re_auth.search(body):
                 return True
@@ -1221,15 +1566,32 @@ class RuTrackerHTTP:
             self.setting['rutracker_password'] = password
 
     def _captcha(self, captcha):
-        if self.unblock ==0: response = self.http.fetch(captcha, headers=self.headers, method='GET')
-        if self.unblock >=1: response = self.http.fetch(captcha, headers=self.headers, method='GET', proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
-        if response.error:
-            return
+        if self.unblock == 4:
+            from urllib.request import Request, urlopen
+            try:
+                cookie_str = '; '.join([c['name'] + '=' + c['value'] for c in getattr(self, '_fs_cookies', [])])
+                useragent = getattr(self, '_fs_useragent', self.headers.get('User-Agent', ''))
+                req = Request(captcha)
+                if cookie_str:
+                    req.add_header('Cookie', cookie_str)
+                if useragent:
+                    req.add_header('User-Agent', useragent)
+                resp = urlopen(req, timeout=10)
+                body = resp.read()
+            except Exception as e:
+                xbmc.log('RUTRACKER: FlareSolverr captcha error: ' + str(e), xbmc.LOGERROR)
+                return
+        else:
+            if self.unblock == 0: response = self.http.fetch(captcha, headers=self.headers, method='GET')
+            if self.unblock >= 1: response = self.http.fetch(captcha, headers=self.headers, method='GET', proxy_protocol=self.proxy_protocol, proxy_host=self.proxy_host, proxy_port=self.proxy_port)
+            if response.error:
+                return
+            body = response.body
 
         import tempfile
         filename = tempfile.gettempdir() + '/captcha'
-        if response.body:
-            file(filename, 'wb').write(response.body)
+        if body:
+            file(filename, 'wb').write(body)
 
         win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
 
