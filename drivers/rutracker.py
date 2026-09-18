@@ -1199,12 +1199,19 @@ class RuTrackerHTTP:
     FS_HEDGE_MAX = 25
 
     def _fs_state_path(self):
-        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        try:
+            from vdlib.scrappers.flaresolverr import FlareSolverrState
+        except ImportError:
+            return ''
         login = self.setting['rutracker_login'] or ''
         return FlareSolverrState.state_path(self.domain, login)
 
     def _fs_load_state(self):
-        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        try:
+            from vdlib.scrappers.flaresolverr import FlareSolverrState
+        except ImportError:
+            self._fs_cookies, self._fs_useragent = [], ''
+            return
         login = self.setting['rutracker_login'] or ''
         state = FlareSolverrState.load(self.domain, login)
         if state:
@@ -1215,7 +1222,10 @@ class RuTrackerHTTP:
             self._fs_cookies, self._fs_useragent = [], ''
 
     def _fs_save_state(self):
-        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        try:
+            from vdlib.scrappers.flaresolverr import FlareSolverrState
+        except ImportError:
+            return
         login = self.setting['rutracker_login'] or ''
         FlareSolverrState.save(self.domain, login,
                                cookies=self._fs_cookies,
@@ -1223,13 +1233,22 @@ class RuTrackerHTTP:
                                latency=self._fs_latency)
 
     def _fs_drop_state(self):
-        from vdlib.scrappers.flaresolverr import FlareSolverrState
         self._fs_cookies, self._fs_useragent = [], ''
+        try:
+            from vdlib.scrappers.flaresolverr import FlareSolverrState
+        except ImportError:
+            return
         login = self.setting['rutracker_login'] or ''
         FlareSolverrState.drop(self.domain, login)
 
     def _fs_cookie_header(self, extra=None):
-        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        try:
+            from vdlib.scrappers.flaresolverr import FlareSolverrState
+        except ImportError:
+            jar = dict((c['name'], c['value']) for c in self._fs_cookies)
+            if extra:
+                jar.update(extra)
+            return '; '.join(k + '=' + v for k, v in jar.items())
         return FlareSolverrState.cookie_header(self._fs_cookies, extra)
 
     def _fs_api(self, payload, timeout=None):
