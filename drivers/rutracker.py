@@ -1200,12 +1200,12 @@ class RuTrackerHTTP:
 
     def _fs_state_path(self):
         from vdlib.scrappers.flaresolverr import FlareSolverrState
-        login = self.setting.get('rutracker_login', '') or ''
+        login = self.setting['rutracker_login'] or ''
         return FlareSolverrState.state_path(self.domain, login)
 
     def _fs_load_state(self):
         from vdlib.scrappers.flaresolverr import FlareSolverrState
-        login = self.setting.get('rutracker_login', '') or ''
+        login = self.setting['rutracker_login'] or ''
         state = FlareSolverrState.load(self.domain, login)
         if state:
             self._fs_cookies = state['cookies']
@@ -1216,7 +1216,7 @@ class RuTrackerHTTP:
 
     def _fs_save_state(self):
         from vdlib.scrappers.flaresolverr import FlareSolverrState
-        login = self.setting.get('rutracker_login', '') or ''
+        login = self.setting['rutracker_login'] or ''
         FlareSolverrState.save(self.domain, login,
                                cookies=self._fs_cookies,
                                useragent=self._fs_useragent,
@@ -1225,7 +1225,7 @@ class RuTrackerHTTP:
     def _fs_drop_state(self):
         from vdlib.scrappers.flaresolverr import FlareSolverrState
         self._fs_cookies, self._fs_useragent = [], ''
-        login = self.setting.get('rutracker_login', '') or ''
+        login = self.setting['rutracker_login'] or ''
         FlareSolverrState.drop(self.domain, login)
 
     def _fs_cookie_header(self, extra=None):
