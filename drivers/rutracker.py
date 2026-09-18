@@ -1078,7 +1078,6 @@ class RuTrackerHTTP:
             except Exception:
                 self.flaresolverr_direct_timeout = 45
             self._fs_latency = float(self.FS_HEDGE_MIN)
-            self._fs_state_file = self._fs_state_path()
             self._fs_load_state()
             self._fs_html_cache = None
 
@@ -1200,59 +1199,38 @@ class RuTrackerHTTP:
     FS_HEDGE_MAX = 25
 
     def _fs_state_path(self):
-        import os
-        try:
-            import xbmcvfs  # type: ignore
-            dirname = xbmcvfs.translatePath('special://temp')
-            for subdir in ('xbmcup', 'plugin.video.rutracker.vd'):
-                dirname = os.path.join(dirname, subdir)
-                if not xbmcvfs.exists(dirname):
-                    xbmcvfs.mkdirs(dirname)
-        except Exception:
-            import tempfile
-            dirname = tempfile.gettempdir()
-        return os.path.join(dirname, 'flaresolverr_state.json')
+        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        login = self.setting.get('rutracker_login', '') or ''
+        return FlareSolverrState.state_path(self.domain, login)
 
     def _fs_load_state(self):
-        import json as json_mod
-        try:
-            with open(self._fs_state_file, 'r') as f:
-                data = json_mod.load(f)
-            # cf_clearance выдаётся на конкретный домен - при смене зеркала
-            # старые куки только мешают
-            if data.get('domain') != self.domain:
-                raise ValueError('domain changed')
-            self._fs_cookies = data.get('cookies', [])
-            self._fs_useragent = data.get('useragent', '')
-            self._fs_latency = float(data.get('latency') or self.FS_HEDGE_MIN)
-            xbmc.log('RUTRACKER: FlareSolverr state loaded: %d cookies, latency %.1fs'
-                     % (len(self._fs_cookies), self._fs_latency), xbmc.LOGDEBUG)
-        except Exception:
+        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        login = self.setting.get('rutracker_login', '') or ''
+        state = FlareSolverrState.load(self.domain, login)
+        if state:
+            self._fs_cookies = state['cookies']
+            self._fs_useragent = state['useragent']
+            self._fs_latency = state['latency']
+        else:
             self._fs_cookies, self._fs_useragent = [], ''
 
     def _fs_save_state(self):
-        import json as json_mod
-        try:
-            with open(self._fs_state_file, 'w') as f:
-                json_mod.dump({'domain': self.domain, 'cookies': self._fs_cookies,
-                               'useragent': self._fs_useragent,
-                               'latency': self._fs_latency}, f)
-        except Exception as e:
-            xbmc.log('RUTRACKER: FlareSolverr state save failed: ' + str(e), xbmc.LOGWARNING)
+        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        login = self.setting.get('rutracker_login', '') or ''
+        FlareSolverrState.save(self.domain, login,
+                               cookies=self._fs_cookies,
+                               useragent=self._fs_useragent,
+                               latency=self._fs_latency)
 
     def _fs_drop_state(self):
-        import os
+        from vdlib.scrappers.flaresolverr import FlareSolverrState
         self._fs_cookies, self._fs_useragent = [], ''
-        try:
-            os.remove(self._fs_state_file)
-        except Exception:
-            pass
+        login = self.setting.get('rutracker_login', '') or ''
+        FlareSolverrState.drop(self.domain, login)
 
     def _fs_cookie_header(self, extra=None):
-        jar = dict((c['name'], c['value']) for c in self._fs_cookies)
-        if extra:
-            jar.update(extra)
-        return '; '.join(k + '=' + v for k, v in jar.items())
+        from vdlib.scrappers.flaresolverr import FlareSolverrState
+        return FlareSolverrState.cookie_header(self._fs_cookies, extra)
 
     def _fs_api(self, payload, timeout=None):
         """Вызов FlareSolverr API. Возвращает solution или None."""
