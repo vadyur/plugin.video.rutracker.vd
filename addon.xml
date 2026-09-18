@@ -3,7 +3,7 @@
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.torrserver" optional="true" />
-    <import addon="script.module.vd-common" optional="true" />
+    <import addon="script.module.vd-common" />
     <import addon="plugin.video.elementum" optional="true" />
     <import addon="plugin.video.tam" optional="true" />
 	<import addon="script.module.requests" />
