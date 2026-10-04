@@ -1237,6 +1237,7 @@ class RuTrackerHTTP:
         import json as json_mod
         from urllib.request import Request, urlopen
         import time as time_mod
+        from vdlib.scrappers.flaresolverr import BrowserProgress, host_port, detect_backend
 
         timeout = timeout or self.flaresolverr_timeout
         payload.setdefault('maxTimeout', timeout * 1000)
@@ -1247,6 +1248,10 @@ class RuTrackerHTTP:
             headers={'Content-Type': 'application/json'},
             method='POST'
         )
+        progress = BrowserProgress(
+            timeout,
+            target='%s %s' % (detect_backend(self.flaresolverr_url),
+                              host_port(self.flaresolverr_url))).start()
         try:
             resp = urlopen(req, timeout=timeout + 30)
             result = json_mod.loads(resp.read().decode('utf-8'))
@@ -1254,6 +1259,8 @@ class RuTrackerHTTP:
             xbmc.log('RUTRACKER: FlareSolverr %s error (%.1fs): %s'
                      % (payload.get('cmd'), time_mod.time() - t0, e), xbmc.LOGERROR)
             return None
+        finally:
+            progress.stop()
 
         elapsed = time_mod.time() - t0
         if result.get('status') != 'ok':
@@ -1279,7 +1286,11 @@ class RuTrackerHTTP:
         payload = {
             'cmd': 'request.get' if method == 'GET' else 'request.post',
             'url': url,
+            # disableMedia - имя FlareSolverr, blockMedia - у Byparr (тот его
+            # игнорирует): без blockMedia goto ждёт "load" картинок/шрифтов,
+            # которые режет DPI, и падает по таймауту (~94с, HTTP 502).
             'disableMedia': True,
+            'blockMedia': True,
         }
         if params:
             if method == 'POST':
@@ -1294,6 +1305,69 @@ class RuTrackerHTTP:
         if solution is None:
             return None
         return solution.get('response', '')
+
+    def _fs_login_post(self, params):
+        """POST login.php с куками состояния, сохраняя Set-Cookie с редиректа.
+
+        Byparr умеет только GET: cmd="request.post" он игнорирует ("purely for
+        compatibility with FlareSolverr"), поэтому логин шлём напрямую.
+        cf_clearance с предварительного браузерного GET пропускает Cloudflare,
+        а CookieJar подхватывает bb_session/bb_ssl с 302 на index.php - без
+        него urlopen теряет Set-Cookie и логин "не проходит".
+        """
+        import time as time_mod
+        from http.cookiejar import Cookie, CookieJar
+        from urllib.parse import urlencode, urlparse
+        from urllib.request import Request, build_opener, HTTPCookieProcessor
+
+        url = self.site_url + '/forum/login.php'
+        jar = CookieJar()
+        opener = build_opener(HTTPCookieProcessor(jar))
+        default_domain = urlparse(self.site_url).hostname or ''
+        for c in self._fs_cookies:
+            try:
+                domain = (c.get('domain') or '').lstrip('.') or default_domain
+                jar.set_cookie(Cookie(
+                    version=0, name=c['name'], value=c['value'],
+                    port=None, port_specified=False,
+                    domain=domain, domain_specified=True, domain_initial_dot=False,
+                    path=c.get('path') or '/', path_specified=True,
+                    secure=bool(c.get('secure', True)),
+                    expires=None, discard=True,
+                    comment=None, comment_url=None, rest={}, rfc2109=False))
+            except Exception as e:
+                xbmc.log('RUTRACKER: login cookie seed failed: %s' % e, xbmc.LOGDEBUG)
+
+        data = urlencode(params, encoding='windows-1251').encode('ascii')
+        req = Request(url, data=data, method='POST')
+        req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+        req.add_header('User-Agent', self._fs_useragent or self.headers['User-Agent'])
+        req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+        req.add_header('Accept-Language', 'ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3')
+        t0 = time_mod.time()
+        try:
+            resp = opener.open(req, timeout=self.flaresolverr_direct_timeout)
+            body = resp.read().decode('windows-1251', 'replace')
+        except Exception as e:
+            xbmc.log('RUTRACKER: direct login POST failed %.1fs: %s'
+                     % (time_mod.time() - t0, e), xbmc.LOGERROR)
+            return None
+
+        now = time_mod.time()
+        fresh = []
+        for ck in jar:
+            if ck.expires is not None and ck.expires < now:
+                continue
+            fresh.append({'name': ck.name, 'value': ck.value,
+                          'domain': ck.domain, 'path': ck.path,
+                          'secure': bool(ck.secure)})
+        if fresh:
+            self._fs_cookies = fresh
+            self._fs_save_state()
+        xbmc.log('RUTRACKER: direct login POST %.1fs http=%s len=%d cookies=%s'
+                 % (time_mod.time() - t0, resp.status, len(body),
+                    [c['name'] for c in fresh]), xbmc.LOGDEBUG)
+        return body
 
     def _fs_direct(self, method, url, params=None, binary=False, cookies=None, timeout=None):
         """Прямой запрос с куками FlareSolverr. Основной (быстрый) путь."""
@@ -1471,11 +1545,14 @@ class RuTrackerHTTP:
                     params[self.captcha_code] = self.captcha_code_value
 
             if self.unblock == 4:
-                # Логин только через FlareSolverr: Chrome проходит проверку
-                # Cloudflare и отдаёт нам готовые куки bb_session/cf_clearance.
-                # Старые куки сбрасываем - с протухшей сессией логин не проходит.
+                # Byparr умеет только GET - request.post он игнорирует,
+                # поэтому логин: браузерный GET снимает cf_clearance, затем
+                # обычный POST с этими куками (_fs_login_post подхватывает
+                # bb_session с редиректа). Старые куки сбрасываем - с
+                # протухшей сессией логин не проходит.
                 self._fs_drop_state()
-                body = self._flaresolverr('POST', self.site_url + '/forum/login.php', params)
+                self._flaresolverr('GET', self.site_url + '/forum/login.php')
+                body = self._fs_login_post(params) if self._fs_cookies else None
                 self.captcha_sid, self.captcha_code, self.captcha_code_value = None, None, None
                 if body is None:
                     return None
