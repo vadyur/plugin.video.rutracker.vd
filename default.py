@@ -2288,6 +2288,8 @@ class RutrackerBase(Handler, Scrapers):
             err = 30001
         elif data == 0:
             err = 30002
+        elif isinstance(data, dict) and "data" not in data:
+            err = 30001
 
         if err:
             lang = self.lang[err].split("|")
