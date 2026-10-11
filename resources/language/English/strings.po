@@ -820,6 +820,26 @@ msgctxt "#50187"
 msgid "Direct request timeout (sec)"
 msgstr ""
 
+msgctxt "#50188"
+msgid "FlareSolverr: use HTTP proxy (same exit IP)"
+msgstr ""
+
+msgctxt "#50190"
+msgid "Network access"
+msgstr ""
+
+msgctxt "#50191"
+msgid "FlareSolverr/Byparr"
+msgstr ""
+
+msgctxt "#50192"
+msgid "Site access"
+msgstr ""
+
+msgctxt "#50193"
+msgid "Interface"
+msgstr ""
+
 msgctxt "#50201"
 msgid "The maximum quality of trailers"
 msgstr ""

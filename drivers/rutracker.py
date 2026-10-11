@@ -217,10 +217,10 @@ class RuTracker:
         # search = search.encode('utf8') #или это тоже работает
 
         # проверяем авторизацию
-        # при unblock==4 это лишний круг по сети: сам поисковый запрос ниже
-        # всё равно проходит через _fetch(), который сам увидит разлогин и
+        # при активном FlareSolverr это лишний круг по сети: сам поисковый запрос
+        # ниже всё равно проходит через _fetch(), который сам увидит разлогин и
         # переавторизуется
-        if self.http.unblock != 4:
+        if not self.http.flaresolverr_enabled:
             html = self.http.get(self.site_url+'/forum/index.php')
             if not html:
                 return None
@@ -1053,6 +1053,16 @@ class RuTrackerHTTP:
         self.unblock = int(self.setting['rutracker_unblock'])
         self._fs_cookies = []
         self._fs_useragent = ''
+        # FlareSolverr/Byparr включается заполненностью поля URL (больше не режим enum).
+        self.flaresolverr_url = self.setting['rutracker_flaresolverr_url'].strip().rstrip('/')
+        self.flaresolverr_enabled = bool(self.flaresolverr_url)
+        # Прокси FlareSolverr: '' = без прокси (прежнее поведение).
+        # Один и тот же exit-IP обязателен и для бэкенда, и для прямых запросов -
+        # иначе cf_clearance (привязана к IP+UA) не принимается.
+        self.fs_proxy = ''
+        # Старый сохранённый режим 4 (FlareSolverr) больше не транспортный режим.
+        if self.unblock == 4:
+            self.unblock = 0
         if self.unblock ==1:
             self.proxy_protocol = 'https'
             proxy_serv = self.setting['proxy_serv'].split(':')
@@ -1066,8 +1076,7 @@ class RuTrackerHTTP:
             self.proxy_protocol = 'socks5'
             self.proxy_host = self.setting['rutracker_socks5_host']
             self.proxy_port = int(self.setting['rutracker_socks5_port'])
-        if self.unblock ==4:
-            self.flaresolverr_url = self.setting['rutracker_flaresolverr_url'].rstrip('/')
+        if self.flaresolverr_enabled:
             self.flaresolverr_timeout = int(self.setting['rutracker_flaresolverr_timeout'])
             # Прямой запрос с куками FlareSolverr - основной (быстрый) путь.
             # Таймаут должен с запасом перекрывать задержку DPI провайдера
@@ -1080,6 +1089,15 @@ class RuTrackerHTTP:
             self._fs_latency = float(self.FS_HEDGE_MIN)
             self._fs_load_state()
             self._fs_html_cache = None
+            # Переиспользуем поля HTTP-прокси (rutracker_proxy_host/port). Включается
+            # только по настройке rutracker_flaresolverr_proxy - иначе FlareSolverr
+            # работает как раньше, без прокси.
+            if self.setting['rutracker_flaresolverr_proxy'] == 'true':
+                proxy_host = self.setting['rutracker_proxy_host'].strip()
+                proxy_port = self.setting['rutracker_proxy_port'].strip()
+                if proxy_host and proxy_port:
+                    self.fs_proxy = 'http://%s:%s' % (proxy_host, proxy_port)
+                    xbmc.log('RUTRACKER: FlareSolverr proxy enabled: %s' % self.fs_proxy, xbmc.LOGDEBUG)
 
         self.headers = {
 #            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:67.0) Gecko/20100101 Firefox/67.0',
@@ -1092,7 +1110,7 @@ class RuTrackerHTTP:
         if '.lib' in self.domain or self.domain in ('rutracker.net', 'rutracker.nl'): self.headers['Accept-Encoding'] = 'gzip' # фикс бага сервера
 
     def guest(self, url):
-        if self.unblock == 4:
+        if self.flaresolverr_enabled:
             body = self._fs_request('GET', url)
             if body is None:
                 return None
@@ -1119,7 +1137,7 @@ class RuTrackerHTTP:
     def download(self, id):
         id = str(id)
 
-        if self.unblock == 4:
+        if self.flaresolverr_enabled:
             # Качаем .torrent напрямую с куками FlareSolverr.
             # FlareSolverr для этого не годится: Chrome отдаёт тело как текст,
             # бинарник торрента через него не вытащить - поэтому при неудаче
@@ -1179,7 +1197,7 @@ class RuTrackerHTTP:
 
     # ################################
     #
-    #   FlareSolverr (unblock == 4)
+    #   FlareSolverr (flaresolverr_enabled)
     #
     #   Схема работы:
     #     * FlareSolverr (headless Chrome) нужен только чтобы получить куки:
@@ -1232,6 +1250,13 @@ class RuTrackerHTTP:
         from vdlib.scrappers.flaresolverr import FlareSolverrState
         return FlareSolverrState.cookie_header(self._fs_cookies, extra)
 
+    def _fs_proxy_handlers(self):
+        """urllib-обработчики прокси для прямых запросов режима 4 (пусто, если выключен)."""
+        if not self.fs_proxy:
+            return []
+        from urllib.request import ProxyHandler
+        return [ProxyHandler({'http': self.fs_proxy, 'https': self.fs_proxy})]
+
     def _fs_api(self, payload, timeout=None):
         """Вызов FlareSolverr API. Возвращает solution или None."""
         import json as json_mod
@@ -1241,17 +1266,25 @@ class RuTrackerHTTP:
 
         timeout = timeout or self.flaresolverr_timeout
         payload.setdefault('maxTimeout', timeout * 1000)
+        backend = detect_backend(self.flaresolverr_url)
+        headers = {'Content-Type': 'application/json'}
+        if self.fs_proxy:
+            # FlareSolverr берёт прокси из payload (proxyUrl), Byparr - из
+            # заголовка X-Proxy-Server. Отдаём каждому его формат.
+            if backend == 'byparr':
+                headers['X-Proxy-Server'] = self.fs_proxy
+            else:
+                payload['proxyUrl'] = self.fs_proxy
         t0 = time_mod.time()
         req = Request(
             self.flaresolverr_url + '/v1',
             data=json_mod.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'},
+            headers=headers,
             method='POST'
         )
         progress = BrowserProgress(
             timeout,
-            target='%s %s' % (detect_backend(self.flaresolverr_url),
-                              host_port(self.flaresolverr_url))).start()
+            target='%s %s' % (backend, host_port(self.flaresolverr_url))).start()
         try:
             resp = urlopen(req, timeout=timeout + 30)
             result = json_mod.loads(resp.read().decode('utf-8'))
@@ -1322,7 +1355,7 @@ class RuTrackerHTTP:
 
         url = self.site_url + '/forum/login.php'
         jar = CookieJar()
-        opener = build_opener(HTTPCookieProcessor(jar))
+        opener = build_opener(*([HTTPCookieProcessor(jar)] + self._fs_proxy_handlers()))
         default_domain = urlparse(self.site_url).hostname or ''
         for c in self._fs_cookies:
             try:
@@ -1371,7 +1404,7 @@ class RuTrackerHTTP:
 
     def _fs_direct(self, method, url, params=None, binary=False, cookies=None, timeout=None):
         """Прямой запрос с куками FlareSolverr. Основной (быстрый) путь."""
-        from urllib.request import Request, urlopen
+        from urllib.request import Request, urlopen, build_opener
         from urllib.parse import urlencode
         import time as time_mod
 
@@ -1396,8 +1429,10 @@ class RuTrackerHTTP:
             req.add_header('Cookie', cookie_str)
 
         t0 = time_mod.time()
+        handlers = self._fs_proxy_handlers()
+        opener = build_opener(*handlers) if handlers else None
         try:
-            resp = urlopen(req, timeout=timeout)
+            resp = opener.open(req, timeout=timeout) if opener else urlopen(req, timeout=timeout)
             data = resp.read()
             if resp.headers.get('Content-Encoding') == 'gzip':
                 import zlib
@@ -1487,7 +1522,7 @@ class RuTrackerHTTP:
 
     def _fetch(self, method, url, params=None):
         while True:
-            if self.unblock == 4:
+            if self.flaresolverr_enabled:
                 if method == 'GET' and not params:
                     body = self._fs_get_cached(url)
                 else:
@@ -1544,7 +1579,7 @@ class RuTrackerHTTP:
                 if self.captcha_code:
                     params[self.captcha_code] = self.captcha_code_value
 
-            if self.unblock == 4:
+            if self.flaresolverr_enabled:
                 # Byparr умеет только GET - request.post он игнорирует,
                 # поэтому логин: браузерный GET снимает cf_clearance, затем
                 # обычный POST с этими куками (_fs_login_post подхватывает
@@ -1574,7 +1609,7 @@ class RuTrackerHTTP:
             if body.find(u'>По техническим причинам форум временно недоступен</div>') != -1:
                 return 0
 
-            if self.unblock == 4:
+            if self.flaresolverr_enabled:
                 if not self.re_auth.search(body):
                     return True
                 xbmc.log('RUTRACKER: FlareSolverr auth failed', xbmc.LOGDEBUG)
@@ -1621,8 +1656,8 @@ class RuTrackerHTTP:
             self.setting['rutracker_password'] = password
 
     def _captcha(self, captcha):
-        if self.unblock == 4:
-            from urllib.request import Request, urlopen
+        if self.flaresolverr_enabled:
+            from urllib.request import Request, urlopen, build_opener
             try:
                 cookie_str = '; '.join([c['name'] + '=' + c['value'] for c in getattr(self, '_fs_cookies', [])])
                 useragent = getattr(self, '_fs_useragent', self.headers.get('User-Agent', ''))
@@ -1631,7 +1666,9 @@ class RuTrackerHTTP:
                     req.add_header('Cookie', cookie_str)
                 if useragent:
                     req.add_header('User-Agent', useragent)
-                resp = urlopen(req, timeout=10)
+                handlers = self._fs_proxy_handlers()
+                opener = build_opener(*handlers) if handlers else None
+                resp = opener.open(req, timeout=10) if opener else urlopen(req, timeout=10)
                 body = resp.read()
             except Exception as e:
                 xbmc.log('RUTRACKER: FlareSolverr captcha error: ' + str(e), xbmc.LOGERROR)
